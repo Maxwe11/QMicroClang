@@ -95,6 +95,7 @@
      <string>&amp;Project</string>
     </property>
     <addaction name="actionShow_tables"/>
+    <addaction name="actionResult_table"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuProject"/>
@@ -112,6 +113,11 @@
   <action name="actionShow_tables">
    <property name="text">
     <string>&amp;Show tables</string>
+   </property>
+  </action>
+  <action name="actionResult_table">
+   <property name="text">
+    <string>Result table</string>
    </property>
   </action>
  </widget>
@@ -189,10 +195,27 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>actionResult_table</sender>
+   <signal>triggered()</signal>
+   <receiver>QMicroClangIDE</receiver>
+   <slot>showResultTable()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>279</x>
+     <y>269</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>openFile()</slot>
   <slot>showTables()</slot>
   <slot>analyze()</slot>
+  <slot>showResultTable()</slot>
  </slots>
 </ui>

@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>871</width>
-    <height>322</height>
+    <width>740</width>
+    <height>480</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -41,7 +41,7 @@
      <x>10</x>
      <y>30</y>
      <width>321</width>
-     <height>251</height>
+     <height>441</height>
     </rect>
    </property>
    <property name="editTriggers">
@@ -70,7 +70,7 @@
      <x>600</x>
      <y>30</y>
      <width>131</width>
-     <height>251</height>
+     <height>441</height>
     </rect>
    </property>
    <property name="editTriggers">
@@ -96,7 +96,7 @@
      <x>470</x>
      <y>30</y>
      <width>121</width>
-     <height>251</height>
+     <height>441</height>
     </rect>
    </property>
    <property name="editTriggers">
@@ -122,7 +122,7 @@
      <x>340</x>
      <y>30</y>
      <width>121</width>
-     <height>251</height>
+     <height>441</height>
     </rect>
    </property>
    <property name="editTriggers">
@@ -179,74 +179,6 @@
    </property>
    <property name="text">
     <string>Strings table:</string>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="stackButton">
-   <property name="geometry">
-    <rect>
-     <x>790</x>
-     <y>290</y>
-     <width>75</width>
-     <height>23</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Next</string>
-   </property>
-  </widget>
-  <widget class="QTableWidget" name="stackTable">
-   <property name="geometry">
-    <rect>
-     <x>740</x>
-     <y>30</y>
-     <width>121</width>
-     <height>251</height>
-    </rect>
-   </property>
-   <property name="editTriggers">
-    <set>QAbstractItemView::NoEditTriggers</set>
-   </property>
-   <property name="selectionMode">
-    <enum>QAbstractItemView::SingleSelection</enum>
-   </property>
-   <property name="selectionBehavior">
-    <enum>QAbstractItemView::SelectRows</enum>
-   </property>
-   <property name="columnCount">
-    <number>1</number>
-   </property>
-   <attribute name="horizontalHeaderDefaultSectionSize">
-    <number>100</number>
-   </attribute>
-   <column/>
-  </widget>
-  <widget class="QPushButton" name="prev">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="geometry">
-    <rect>
-     <x>710</x>
-     <y>290</y>
-     <width>75</width>
-     <height>23</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Prev</string>
-   </property>
-  </widget>
-  <widget class="QLabel" name="stackLabel">
-   <property name="geometry">
-    <rect>
-     <x>740</x>
-     <y>10</y>
-     <width>81</width>
-     <height>16</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Stack:</string>
    </property>
   </widget>
  </widget>

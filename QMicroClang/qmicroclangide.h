@@ -19,6 +19,7 @@ public:
 private slots:
     void openFile();
     void showTables();
+    void showResultTable();
     void analyze();
 
     void catchedError(QStringList);

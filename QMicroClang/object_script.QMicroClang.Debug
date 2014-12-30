@@ -1,0 +1,13 @@
+INPUT(
+./debug\main.o
+./debug\qmicroclangide.o
+./debug\codeeditor.o
+./debug\qmicroclangtables.o
+./debug\qmicroclangparser.o
+./debug\qmicroclangresulttable.o
+./debug\moc_qmicroclangide.o
+./debug\moc_codeeditor.o
+./debug\moc_qmicroclangtables.o
+./debug\moc_qmicroclangparser.o
+./debug\moc_qmicroclangresulttable.o
+);

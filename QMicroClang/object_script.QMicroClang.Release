@@ -1,0 +1,13 @@
+INPUT(
+./release\main.o
+./release\qmicroclangide.o
+./release\codeeditor.o
+./release\qmicroclangtables.o
+./release\qmicroclangparser.o
+./release\qmicroclangresulttable.o
+./release\moc_qmicroclangide.o
+./release\moc_codeeditor.o
+./release\moc_qmicroclangtables.o
+./release\moc_qmicroclangparser.o
+./release\moc_qmicroclangresulttable.o
+);

@@ -17,15 +17,8 @@ public:
     explicit QMicroClangTables(QMicroClangParser* p, QWidget *parent = 0);
     ~QMicroClangTables();
 
-private slots:
-    void on_stackButton_clicked();
-
-    void on_prev_clicked();
-
 private:
     Ui::QMicroClangTables *ui;
-    QMicroClangParser* parser;
-    uint counter;
 };
 
 #endif // QMICROCLANGTABLES_H

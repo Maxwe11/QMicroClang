@@ -6,6 +6,7 @@
 #include "ui_qmicroclangide.h"
 
 #include "qmicroclangtables.h"
+#include "qmicroclangresulttable.h"
 
 QMicroClangIDE::QMicroClangIDE(QWidget *parent)
     : QMainWindow(parent)
@@ -46,6 +47,13 @@ void QMicroClangIDE::showTables()
     QMicroClangTables* tables = new QMicroClangTables(this->parser);
     tables->setAttribute(Qt::WA_DeleteOnClose, true);
     tables->show();
+}
+
+void QMicroClangIDE::showResultTable()
+{
+    QMicroClangResultTable* table = new QMicroClangResultTable(this->parser);
+    table->setAttribute(Qt::WA_DeleteOnClose, true);
+    table->show();
 }
 
 void QMicroClangIDE::analyze()

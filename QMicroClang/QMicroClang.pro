@@ -11,18 +11,22 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp\
-        qmicroclangide.cpp \
-    codeeditor.cpp \
-    qmicroclangtables.cpp \
-    qmicroclangparser.cpp
+           qmicroclangide.cpp \
+           codeeditor.cpp \
+           qmicroclangtables.cpp \
+           qmicroclangparser.cpp \
+           qmicroclangresulttable.cpp
 
 HEADERS  += qmicroclangide.h \
-    codeeditor.h \
-    qmicroclangtables.h \
-    qmicroclangparser.h
+            codeeditor.h \
+            qmicroclangtables.h \
+            qmicroclangparser.h \
+            qmicroclangresulttable.h
 
 FORMS    += qmicroclangide.ui \
-    qmicroclangtables.ui
+            qmicroclangtables.ui \
+            qmicroclangresulttable.ui
+
 
 
 

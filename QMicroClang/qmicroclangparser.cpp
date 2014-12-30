@@ -1,3 +1,6 @@
+#include <QDebug>
+#include <QStack>
+
 #include "qmicroclangparser.h"
 
 QMicroClangParser::QMicroClangParser(QObject* parent)
@@ -40,6 +43,7 @@ QMicroClangParser::QMicroClangParser(QObject* parent)
 
 bool QMicroClangParser::parse(const QStringList &list)
 {
+    res_stack.clear();
     res_table.clear();
     err_list.clear();
     id_table.clear();
@@ -52,35 +56,486 @@ bool QMicroClangParser::parse(const QStringList &list)
         return false;
     }
 
-    uint cur_lex(0);
-    bool res = false;
+    uint cur_lex(0), state(1);
+    bool exit = false;
 
-    if (declarationList(cur_lex) == true)
+    QStack<uint> stack;
+
+    while (exit == false)
     {
-        if (res_table[cur_lex].lex_code == 12) // 12 - {
+        switch (state)
         {
-            if (operatorsList(++cur_lex) == true)
+        case 1:
+            if (res_table[cur_lex].lex_code == 1) //1 - double
             {
-                if (cur_lex < res_table.size() && res_table[cur_lex].lex_code == 13)
-                    res = true;
-                else
-                    err_list << QString("%1: parser error: \'}\' excepted").arg(res_table[cur_lex - 1].line_num);
+                res_stack.push_back(std::vector<uint>(stack.begin(), stack.end()));
+                state = 2;
+                ++cur_lex;
             }
+            else
+            {
+                err_list << QString("%1: parser error: excepted declaration part").arg(res_table[cur_lex].line_num);
+                exit = true;
+            }
+            break;
+        case 2:
+            if (res_table[cur_lex].lex_code == 31) //31 - id
+            {
+                res_stack.push_back(std::vector<uint>(stack.begin(), stack.end()));
+                state = 3;
+                ++cur_lex;
+            }
+            else
+            {
+                err_list << QString("%1: parser error: identifier excepted").arg(res_table[cur_lex].line_num);
+                exit = true;
+            }
+            break;
+        case 3:
+            if (res_table[cur_lex].lex_code == 15) //15 - ,
+            {
+                res_stack.push_back(std::vector<uint>(stack.begin(), stack.end()));
+                state = 2;
+                ++cur_lex;
+            }
+            else if (res_table[cur_lex].lex_code == 14) //14 - ;
+            {
+                res_stack.push_back(std::vector<uint>(stack.begin(), stack.end()));
+                state = 4;
+                ++cur_lex;
+            }
+            else
+            {
+                err_list << QString("%1: parser error: declaration error").arg(res_table[cur_lex].line_num);
+                exit = true;
+            }
+            break;
+        case 4:
+            if (res_table[cur_lex].lex_code == 12) //12 - {
+            {
+                res_stack.push_back(std::vector<uint>(stack.begin(), stack.end()));
+                stack.push(5);
+                state = 11;
+                ++cur_lex;
+            }
+            else
+            {
+                state = 1;
+            }
+            break;
+        case 5:
+            if (res_table[cur_lex].lex_code == 13) //13 - }
+            {
+                exit = true;
+            }
+            else
+            {
+                stack.push(5);
+                state = 11;
+            }
+            break;
+        case 11:
+            if (res_table[cur_lex].lex_code == 31) //31 - id
+            {
+                res_stack.push_back(std::vector<uint>(stack.begin(), stack.end()));
+                state = 12;
+                ++cur_lex;
+            }
+            else if (res_table[cur_lex].lex_code == 2) //2 - read
+            {
+                res_stack.push_back(std::vector<uint>(stack.begin(), stack.end()));
+                state = 14;
+                ++cur_lex;
+            }
+            else if (res_table[cur_lex].lex_code == 3) //3 - write
+            {
+                res_stack.push_back(std::vector<uint>(stack.begin(), stack.end()));
+                state = 17;
+                ++cur_lex;
+            }
+            else if (res_table[cur_lex].lex_code == 7) //7 - while
+            {
+                res_stack.push_back(std::vector<uint>(stack.begin(), stack.end()));
+                stack.push(20);
+                state = 301;
+                ++cur_lex;
+            }
+            else if (res_table[cur_lex].lex_code == 4) //4 - if
+            {
+                res_stack.push_back(std::vector<uint>(stack.begin(), stack.end()));
+                stack.push(24);
+                state = 301;
+                ++cur_lex;
+            }
+            else
+            {
+                err_list << QString("%1: parser error: unkown operator").arg(res_table[cur_lex].line_num);
+                exit = true;
+            }
+            break;
+        case 12:
+            if (res_table[cur_lex].lex_code == 20) //20 - =
+            {
+                res_stack.push_back(std::vector<uint>(stack.begin(), stack.end()));
+                stack.push_back(13);
+                state = 201;
+                ++cur_lex;
+            }
+            else
+            {
+                err_list << QString("%1: parser error: excepted \'=\' after identifier").arg(res_table[cur_lex].line_num);
+                exit = true;
+            }
+            break;
+        case 13:
+            if (res_table[cur_lex].lex_code == 14) //14 - ;
+            {
+                res_stack.push_back(std::vector<uint>(stack.begin(), stack.end()));
+                state = stack.pop();
+                ++cur_lex;
+            }
+            else
+            {
+                err_list << QString("%1: parser error: excepted \';\' after operator").arg(res_table[cur_lex].line_num);
+                exit = true;
+            }
+            break;
+        case 14:
+            if (res_table[cur_lex].lex_code == 27) //27 - (
+            {
+                res_stack.push_back(std::vector<uint>(stack.begin(), stack.end()));
+                state = 15;
+                ++cur_lex;
+            }
+            else
+            {
+                err_list << QString("%1: parser error: excepted \'(\' in operator \'read\'").arg(res_table[cur_lex].line_num);
+                exit = true;
+            }
+            break;
+        case 15:
+            if (res_table[cur_lex].lex_code == 31) // 31 - id
+            {
+                res_stack.push_back(std::vector<uint>(stack.begin(), stack.end()));
+                state = 16;
+                ++cur_lex;
+            }
+            else
+            {
+                err_list << QString("%1: parser error: excepted identifier").arg(res_table[cur_lex].line_num);
+                exit = true;
+            }
+            break;
+        case 16:
+            if (res_table[cur_lex].lex_code == 28) // 28 - )
+            {
+                res_stack.push_back(std::vector<uint>(stack.begin(), stack.end()));
+                state = 13;
+                ++cur_lex;
+            }
+            else if (res_table[cur_lex].lex_code == 15) //15 - ,
+            {
+                res_stack.push_back(std::vector<uint>(stack.begin(), stack.end()));
+                state = 15;
+                ++cur_lex;
+            }
+            else
+            {
+                err_list << QString("%1: parser error: excepted \')\'' in operator \'read\'").arg(res_table[cur_lex].line_num);
+                exit = true;
+            }
+            break;
+        case 17:
+            if (res_table[cur_lex].lex_code == 27) //27 - (
+            {
+                res_stack.push_back(std::vector<uint>(stack.begin(), stack.end()));
+                state = 18;
+                ++cur_lex;
+            }
+            else
+            {
+                err_list << QString("%1: parser error: excepted \'(\' in operator \'write\'").arg(res_table[cur_lex].line_num);
+                exit = true;
+            }
+            break;
+        case 18:
+            if (res_table[cur_lex].lex_code == 31 || res_table[cur_lex].lex_code == 32 || res_table[cur_lex].lex_code == 33) // 31 - id
+            {
+                res_stack.push_back(std::vector<uint>(stack.begin(), stack.end()));
+                state = 19;
+                ++cur_lex;
+            }
+            else
+            {
+                err_list << QString("%1: parser error: excepted (identifier | numeric constant | string constant)").arg(res_table[cur_lex].line_num);
+                exit = true;
+            }
+            break;
+        case 19:
+            if (res_table[cur_lex].lex_code == 28) // 28 - )
+            {
+                res_stack.push_back(std::vector<uint>(stack.begin(), stack.end()));
+                state = 13;
+                ++cur_lex;
+            }
+            else if (res_table[cur_lex].lex_code == 15) //15 - ,
+            {
+                res_stack.push_back(std::vector<uint>(stack.begin(), stack.end()));
+                state = 18;
+                ++cur_lex;
+            }
+            else
+            {
+                err_list << QString("%1: parser error: excepted \')\'' in operator \'write\'").arg(res_table[cur_lex].line_num);
+                exit = true;
+            }
+            break;
+        case 20:
+            if (res_table[cur_lex].lex_code == 8) //8 - do
+            {
+                res_stack.push_back(std::vector<uint>(stack.begin(), stack.end()));
+                state = 21;
+                ++cur_lex;
+            }
+            else
+            {
+                err_list << QString("%1: parser error: excepted \'do\' in operator \'while\'").arg(res_table[cur_lex].line_num);
+                exit = true;
+            }
+            break;
+        case 21:
+            state = 11;
+            if (res_table[cur_lex].lex_code == 12) //12 - {
+            {
+                res_stack.push_back(std::vector<uint>(stack.begin(), stack.end()));
+                stack.push(22);
+                ++cur_lex;
+            }
+            else
+            {
+                stack.push(23);
+            }
+            break;
+        case 22:
+            if (res_table[cur_lex].lex_code == 13) //13 - }
+            {
+                res_stack.push_back(std::vector<uint>(stack.begin(), stack.end()));
+                state = 23;
+                ++cur_lex;
+            }
+            else
+            {
+                stack.push(22);
+                state = 11;
+            }
+            break;
+        case 23:
+            state = stack.pop();
+            break;
+        case 24:
+            if (res_table[cur_lex].lex_code == 5) //5 - then
+            {
+                res_stack.push_back(std::vector<uint>(stack.begin(), stack.end()));
+                state = 25;
+                ++cur_lex;
+            }
+            else
+            {
+                err_list << QString("%1: parser error: excepted \'then\' in operator \'if\'").arg(res_table[cur_lex].line_num);
+                exit = true;
+            }
+            break;
+        case 25:
+            state = 11;
+            if (res_table[cur_lex].lex_code == 12) //12 - {
+            {
+                res_stack.push_back(std::vector<uint>(stack.begin(), stack.end()));
+                stack.push(26);
+                ++cur_lex;
+            }
+            else
+            {
+                stack.push(27);
+            }
+            break;
+        case 26:
+            if (res_table[cur_lex].lex_code == 13) //13 - }
+            {
+                res_stack.push_back(std::vector<uint>(stack.begin(), stack.end()));
+                state = 27;
+                ++cur_lex;
+            }
+            else
+            {
+                stack.push(26);
+                state = 11;
+            }
+            break;
+        case 27:
+            if (res_table[cur_lex].lex_code == 6) //6 - else
+            {
+                res_stack.push_back(std::vector<uint>(stack.begin(), stack.end()));
+                state = 28;
+                ++cur_lex;
+            }
+            else
+            {
+                err_list << QString("%1: parser error: excepted \'else\' in operator \'if\'").arg(res_table[cur_lex].line_num);
+                exit = true;
+            }
+            break;
+        case 28:
+            state = 11;
+            if (res_table[cur_lex].lex_code == 12) //12 - {
+            {
+                res_stack.push_back(std::vector<uint>(stack.begin(), stack.end()));
+                stack.push(29);
+                ++cur_lex;
+            }
+            else
+            {
+                stack.push(23);
+            }
+            break;
+        case 29:
+            if (res_table[cur_lex].lex_code == 13) //13 - }
+            {
+                res_stack.push_back(std::vector<uint>(stack.begin(), stack.end()));
+                state = 23;
+                ++cur_lex;
+            }
+            else
+            {
+                stack.push(29);
+                state = 11;
+            }
+            break;
+        case 201:
+            if (res_table[cur_lex].lex_code == 16 || res_table[cur_lex].lex_code == 17) //16 - + 17 - -
+            {
+                res_stack.push_back(std::vector<uint>(stack.begin(), stack.end()));
+                ++cur_lex;
+            }
+            state = 202;
+            break;
+        case 202:
+            if (res_table[cur_lex].lex_code == 31 || res_table[cur_lex].lex_code == 32) //31 - id 32 - numeric
+            {
+                res_stack.push_back(std::vector<uint>(stack.begin(), stack.end()));
+                state = 203;
+                ++cur_lex;
+            }
+            else if (res_table[cur_lex].lex_code == 27) //27 - (
+            {
+                res_stack.push_back(std::vector<uint>(stack.begin(), stack.end()));
+                stack.push(204);
+                state = 201;
+                ++cur_lex;
+            }
+            else
+            {
+                err_list << QString("%1: parser error: invalid arithmetic expression").arg(res_table[cur_lex].line_num);
+                exit = true;
+            }
+            break;
+        case 203:
+            if (res_table[cur_lex].lex_code >= 16 && res_table[cur_lex].lex_code <= 19)
+            {
+                res_stack.push_back(std::vector<uint>(stack.begin(), stack.end()));
+                state = 202;
+                ++cur_lex;
+            }
+            else
+            {
+                state = stack.pop();
+            }
+            break;
+        case 204:
+            if (res_table[cur_lex].lex_code == 28) //28 - )
+            {
+                res_stack.push_back(std::vector<uint>(stack.begin(), stack.end()));
+                state = 203;
+                ++cur_lex;
+            }
+            else
+            {
+                err_list << QString("%1: parser error: missing \')\'").arg(res_table[cur_lex].line_num);
+                exit = true;
+            }
+            break;
+        case 301:
+            if (res_table[cur_lex].lex_code == 11) //11 - !
+            {
+                res_stack.push_back(std::vector<uint>(stack.begin(), stack.end()));
+                state = 301;
+                ++cur_lex;
+            }
+            else if (res_table[cur_lex].lex_code == 29) // 29 - [
+            {
+                res_stack.push_back(std::vector<uint>(stack.begin(), stack.end()));
+                stack.push(304);
+                state = 301;
+                ++cur_lex;
+            }
+            else
+            {
+                stack.push(302);
+                state = 201;
+            }
+            break;
+        case 302:
+            if (res_table[cur_lex].lex_code >= 21 && res_table[cur_lex].lex_code <= 26)
+            {
+                res_stack.push_back(std::vector<uint>(stack.begin(), stack.end()));
+                stack.push(303);
+                state = 201;
+                ++cur_lex;
+            }
+            else
+            {
+                err_list << QString("%1: parser error: invalid logic expression").arg(res_table[cur_lex].line_num);
+                exit = true;
+            }
+            break;
+        case 303:
+            if (res_table[cur_lex].lex_code == 9 || res_table[cur_lex].lex_code == 10)
+            {
+                res_stack.push_back(std::vector<uint>(stack.begin(), stack.end()));
+                state = 301;
+                ++cur_lex;
+            }
+            else
+            {
+                state = stack.pop();
+            }
+            break;
+        case 304:
+            if (res_table[cur_lex].lex_code == 30) //30 - ]
+            {
+                res_stack.push_back(std::vector<uint>(stack.begin(), stack.end()));
+                state = 303;
+                ++cur_lex;
+            }
+            else
+            {
+                err_list << QString("%1: parser error: missing \']\'").arg(res_table[cur_lex].line_num);
+                exit = true;
+            }
+            break;
         }
     }
 
-    if (cur_lex < res_table.size() - 1 && res == true)
-    {
-        res = false;
+    if (cur_lex < res_table.size() - 1)
         err_list << QString("%1: parser error: end of program found before end of file: \'{\' excepted").arg(res_table[cur_lex - 1].line_num);
-    }
+    else if (cur_lex > res_table.size() - 1)
+        err_list << QString("%1: parser error: \'}\' excepted").arg(res_table[cur_lex - 1].line_num);
 
-    if (res == false)
+    if (err_list.isEmpty() == false)
         emit this->error(err_list);
     else
         emit this->noErrors();
 
-    return res;
+    return err_list.isEmpty();
 }
 
 bool QMicroClangParser::scan(QStringList code)
@@ -152,14 +607,14 @@ bool QMicroClangParser::scan(QStringList code)
 bool QMicroClangParser::getToken(QString &str, QString &token, lexeme_type &lex, uint line)
 {
     uint cur(0), len = static_cast<uint>(str.length());
-    //РџСЂРѕР±РµР»С‹ Рё С‚Р°Р±СѓР»СЏС†РёСЏ
+    //Пробелы и табуляция
     if (isSpace(str[cur]) == true)
     {
         str.remove(0, 1);
         return false;
     }
-    // * РљР»СЋС‡РµРІС‹Рµ СЃР»РѕРІР° Рё РёРґРµРЅС‚РёС„РёРєР°С‚РѕСЂС‹
-    // * РџСЂРёРјРµС‡Р°РЅРёРµ: РїСЂРѕРІРµСЂРєР° РёРґРµРЅС‚РёС„РёРєР°С‚РѕСЂР° РЅР° СЃСѓС‰РµСЃС‚РІРѕРІР°РЅРёРµ/РїРѕРІС‚РѕСЂ РїСЂРѕРёСЃС…РѕРґРёРІ РІ Scanner::scan
+    // * Ключевые слова и идентификаторы
+    // * Примечание: проверка идентификатора на существование/повтор происходив в Scanner::scan
     else if (str[cur].isLetter())
     {
         token = str[cur++];
@@ -330,374 +785,4 @@ void QMicroClangParser::getExpNumPart(const QString &str, QString &token, uint &
     {
         err_list << QString("%1: scan error: invalid constant value: %2").arg(line).arg(token);
     }
-}
-
-bool QMicroClangParser::declarationList(uint &cur_lex)
-{
-    bool res = false;
-    uint cur = cur_lex;
-
-    if (declaration(cur_lex) == true)
-    {
-        ++cur_lex;
-        res = true;
-        declarationList(cur_lex);
-    }
-    else
-    {
-        if (cur != cur_lex)
-            err_list << QString("%1: parser error: undeclared \'%2\'").arg(res_table[cur_lex].line_num).arg(res_table[cur_lex].lex);
-        else
-            res = true;
-    }
-
-    return res;
-}
-
-bool QMicroClangParser::declaration(uint& cur_lex)
-{
-    static uint counter(0);
-    ++counter;
-
-    bool res = false;
-
-    if (res_table[cur_lex].lex_code == 1) // 1 - double
-    {
-        if (idList(++cur_lex) == true)
-        {
-            if (res_table[cur_lex].lex_code == 14) // 14 - ; С‚РѕС‡РєР° СЃ Р·Р°РїСЏС‚РѕР№
-                res = true;
-            else
-                err_list << QString("%1: parser error: excepted \';\'").arg(res_table[cur_lex].line_num);
-        }
-    }
-
-    if (res == false && counter == 1)
-    {
-        err_list << QString("%1: parser error: excepted declaration part").arg(res_table[cur_lex].line_num);
-    }
-
-    return res;
-}
-
-bool QMicroClangParser::idList(uint& cur_lex)
-{
-    bool res = false;
-
-    if (res_table[cur_lex].lex_code == 31) // 31 - id
-    {
-        ++cur_lex;
-        res = true;
-
-        while (res_table[cur_lex].lex_code == 15 && res) //15 - , Р·Р°РїСЏС‚Р°СЏ
-        {
-            ++cur_lex;
-            if (res_table[cur_lex].lex_code == 31) // 31 - id
-                ++cur_lex;
-            else
-            {
-                res = false;
-                err_list << QString("%1: parser error: identifier excepted after \',\'").arg(res_table[cur_lex].line_num);
-            }
-        }
-    }
-    else
-    {
-        err_list << QString("%1: parser error: identifier excepted").arg(res_table[cur_lex].line_num);
-    }
-
-    return res;
-}
-
-bool QMicroClangParser::operatorsList(uint& cur_lex)
-{
-    bool res = false;
-
-    if (operator_(cur_lex) == true)
-    {
-        ++cur_lex;
-        res = true;
-        while (cur_lex < res_table.size() && res_table[cur_lex].lex_code != 13 && res == true)
-        {
-            if (operator_(cur_lex) == true)
-                ++cur_lex;
-            else
-                break;
-        }
-    }
-
-    if (err_list.isEmpty() == false)
-        res = false;
-
-    return res;
-}
-
-bool QMicroClangParser::operator_(uint& cur_lex)
-{
-    bool res = false;
-    //РїСЂРёСЃРІРѕРµРЅРёРµ
-    if (res_table[cur_lex].lex_code == 31) // 31 - id
-    {
-        if (res_table[++cur_lex].lex_code == 20) //20 - = equal
-            if (expression(++cur_lex) == true)
-                if (res_table[++cur_lex].lex_code == 14) // 14 - ;
-                    res = true;
-    }
-    //read
-    else if (res_table[cur_lex].lex_code == 2) // 2 - read
-    {
-        if (res_table[++cur_lex].lex_code == 27) //27 - (
-            if (idList(++cur_lex) == true)
-                if (res_table[cur_lex].lex_code == 28) //28 - )
-                    if (res_table[++cur_lex].lex_code == 14) // 14 - ;
-                        res = true;
-    }
-    //write
-    else if (res_table[cur_lex].lex_code == 3) // 3 - write
-    {
-        if (res_table[++cur_lex].lex_code == 27) //27 - (
-            if (outputList(++cur_lex) == true)
-                if (res_table[cur_lex].lex_code == 28) //28 - )
-                    if (res_table[++cur_lex].lex_code == 14) // 14 - ;
-                        res = true;
-
-    }
-    //while
-    else if (res_table[cur_lex].lex_code == 7) //7 - while
-    {
-        if (booleanExpression(++cur_lex) == true)
-            if (res_table[++cur_lex].lex_code == 8) //8 - do
-                if (statement(++cur_lex) == true)
-                    res = true;
-    }
-    //if
-    else if (res_table[cur_lex].lex_code == 4) //4 - if
-    {
-        if (booleanExpression(++cur_lex) == true)
-            if (res_table[++cur_lex].lex_code == 5) //5 - then
-                if (statement(++cur_lex) == true)
-                    if (res_table[++cur_lex].lex_code == 6) //6 - else
-                        if (statement(++cur_lex) == true)
-                            res = true;
-    }
-
-    if (res == false)
-    {
-        err_list << QString("%1: parser error: unkown operator").arg(res_table[cur_lex].line_num);;
-    }
-
-    return res;
-}
-
-bool QMicroClangParser::outputList(uint& cur_lex)
-{
-    bool res = false;
-
-    if (res_table[cur_lex].lex_code == 31 || res_table[cur_lex].lex_code == 32 || res_table[cur_lex].lex_code == 33)
-    {
-        ++cur_lex;
-        res = true;
-        while (res_table[cur_lex].lex_code == 15 && res) //15 - , Р·Р°РїСЏС‚Р°СЏ
-        {
-            ++cur_lex;
-            if (res_table[cur_lex].lex_code == 31 || res_table[cur_lex].lex_code == 32 || res_table[cur_lex].lex_code == 33) // 31 - id
-                ++cur_lex;
-            else
-            {
-                res = false;
-                err_list << QString("%1: parser error: element of output excepted after \',\'").arg(res_table[cur_lex].line_num);
-            }
-        }
-    }
-    else
-    {
-        err_list << QString("%1: parser error: output list cannot be empty").arg(res_table[cur_lex].line_num);
-    }
-
-    return res;
-}
-
-bool QMicroClangParser::statement(uint& cur_lex)
-{
-    bool res = false;
-
-    if (res_table[cur_lex].lex_code == 12) //12 - {
-    {
-        if (operatorsList(++cur_lex) == true)
-        {
-            if (res_table[cur_lex].lex_code == 13) //13 - }
-                res = true;
-            else
-                err_list << QString("%1: parser error: missing closing bracket \'}\'").arg(res_table[cur_lex].line_num);
-        }
-    }
-    else if (operator_(cur_lex) == true)
-    {
-        res = true;
-    }
-
-    return res;
-}
-
-bool QMicroClangParser::expression(uint& cur_lex)
-{
-    bool res = false;
-
-    if (res_table[cur_lex].lex_code == 16 || res_table[cur_lex].lex_code == 17) //16 - Р·РЅР°Рє + 17 - Р·РЅР°Рє РјРёРЅСѓСЃ -
-    {
-        ++cur_lex;
-    }
-
-    if (term(cur_lex) == true)
-    {
-        while (true)
-        {
-            res = true;
-            ++cur_lex;
-            if (res_table[cur_lex].lex_code == 16 || res_table[cur_lex].lex_code == 17) //16 - Р·РЅР°Рє + 17 - Р·РЅР°Рє РјРёРЅСѓСЃ -
-            {
-                if (term(++cur_lex) == true)
-                    res = true;
-            }
-            else
-            {
-                --cur_lex;
-                break;
-            }
-        }
-    }
-
-    if (res == false)
-        err_list << QString("%1: parser error: invalid arithmetic expression").arg(res_table[cur_lex].line_num);
-
-    return res;
-}
-
-bool QMicroClangParser::term(uint& cur_lex)
-{
-    bool res = false;
-
-    if (factor(cur_lex) == true)
-    {
-        while (true)
-        {
-            res = true;
-            ++cur_lex;
-            if (res_table[cur_lex].lex_code == 18 || res_table[cur_lex].lex_code == 19) // 18 - Р·РЅР°Рє * СѓРјРЅРѕР¶РµРЅРёСЏ  19 - Р·РЅР°Рє / - РґРµР»РµРЅРёСЏ
-            {
-                if (factor(++cur_lex) == true)
-                    res = true;
-            }
-            else
-            {
-                --cur_lex;
-                break;
-            }
-        }
-    }
-
-    return res;
-}
-
-bool QMicroClangParser::factor(uint& cur_lex)
-{
-    bool res = false;
-
-    if (res_table[cur_lex].lex_code == 31) //31 - id
-        res = true;
-    else if (res_table[cur_lex].lex_code == 32) //32 - numeric
-        res = true;
-    else if (res_table[cur_lex].lex_code == 27) //27 - (
-    {
-        if (expression(++cur_lex) == true)
-        {
-            if (res_table[++cur_lex].lex_code == 28) //28 - )
-                res = true;
-        }
-    }
-
-    return res;
-}
-
-bool QMicroClangParser::booleanExpression(uint& cur_lex)
-{
-    bool res = false;
-
-    if (booleanTerm(cur_lex) == true)
-    {
-        while (true)
-        {
-            res = true;
-            if (res_table[++cur_lex].lex_code == 9) // 9 - || - or
-            {
-                if (booleanTerm(++cur_lex) == true)
-                    res = true;
-            }
-            else
-            {
-                --cur_lex;
-                break;
-            }
-        }
-    }
-
-    if (res == false)
-        err_list << QString("%1: parser error: invalid logic expression").arg(res_table[cur_lex].line_num);
-
-    return res;
-}
-
-bool QMicroClangParser::booleanTerm(uint& cur_lex)
-{
-    bool res = false;
-
-    if (booleanFactor(cur_lex) == true)
-    {
-        while (true)
-        {
-            res = true;
-            if (res_table[++cur_lex].lex_code == 10) //10 - && and
-            {
-                if (booleanFactor(++cur_lex) == true)
-                    res = true;
-            }
-            else
-            {
-                --cur_lex;
-                break;
-            }
-        }
-    }
-
-    return res;
-}
-
-bool QMicroClangParser::booleanFactor(uint& cur_lex)
-{
-    bool res = false;
-
-    if (res_table[cur_lex].lex_code == 11) // 11- ! - not
-    {
-        if (booleanExpression(++cur_lex) == true)
-            res = true;
-    }
-    else if (res_table[cur_lex].lex_code == 29) // 29 - [
-    {
-        if (booleanExpression(++cur_lex) == true)
-        {
-            if (res_table[++cur_lex].lex_code == 30) // 30 - ]
-                res = true;
-        }
-    }
-    else if (expression(cur_lex) == true)
-    {
-        ++cur_lex;
-        if (res_table[cur_lex].lex_code >= 21 && res_table[cur_lex].lex_code <= 26) //21 - 26 > >= < <= == !=
-        {
-            if (expression(++cur_lex) == true)
-                res = true;
-        }
-    }
-
-    return res;
 }

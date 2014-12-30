@@ -1,11 +1,15 @@
+#include <vector>
+
 #include "qmicroclangtables.h"
 #include "ui_qmicroclangtables.h"
 
-QMicroClangTables::QMicroClangTables(QMicroClangParser* p, QWidget *parent) :
-    QWidget(parent),
-    ui(new Ui::QMicroClangTables)
+QMicroClangTables::QMicroClangTables(QMicroClangParser* p, QWidget *parent)
+    : QWidget(parent)
+    , ui(new Ui::QMicroClangTables)
+    , parser(p)
+    , counter()
 {
-    this->setFixedSize(740, 480);
+    this->setFixedSize(884, 333);
 
     ui->setupUi(this);
     ui->resultTable->setRowCount(p->res_table.size());
@@ -55,4 +59,48 @@ QMicroClangTables::QMicroClangTables(QMicroClangParser* p, QWidget *parent) :
 QMicroClangTables::~QMicroClangTables()
 {
     delete ui;
+}
+
+void QMicroClangTables::on_stackButton_clicked()
+{
+    this->ui->stackTable->clear();
+
+    if (parser->res_stack.size() == counter)
+        counter = 0;
+
+    QTableWidgetItem* tmp;
+    uint j = 0;
+    this->ui->stackTable->setRowCount(parser->res_stack[counter].size());
+    for (
+         std::vector<uint>::iterator it = parser->res_stack[counter].begin(), end = parser->res_stack[counter].end();
+         it != end;
+         ++it, ++j)
+    {
+        tmp = new QTableWidgetItem(QString("%1").arg(parser->res_stack[counter][j]));
+        this->ui->stackTable->setItem(j, 0, tmp);
+    }
+    this->ui->resultTable->setCurrentItem(ui->resultTable->item(counter, 0));
+    ++counter;
+}
+
+void QMicroClangTables::on_prev_clicked()
+{
+    this->ui->stackTable->clear();
+
+    if (0 == counter)
+        counter = parser->res_stack.size();
+
+    QTableWidgetItem* tmp;
+    uint j = 0;
+    this->ui->stackTable->setRowCount(parser->res_stack[counter].size());
+    for (
+         std::vector<uint>::iterator it = parser->res_stack[counter].begin(), end = parser->res_stack[counter].end();
+         it != end;
+         ++it, ++j)
+    {
+        tmp = new QTableWidgetItem(QString("%1").arg(parser->res_stack[counter][j]));
+        this->ui->stackTable->setItem(j, 0, tmp);
+    }
+    this->ui->resultTable->setCurrentItem(ui->resultTable->item(counter, 0));
+    --counter;
 }

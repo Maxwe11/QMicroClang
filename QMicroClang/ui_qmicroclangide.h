@@ -1,8 +1,8 @@
 /********************************************************************************
 ** Form generated from reading UI file 'qmicroclangide.ui'
 **
-** Created: Tue 8. Nov 04:21:59 2011
-**      by: Qt User Interface Compiler version 4.7.4
+** Created: Wed 25. Jan 21:42:31 2012
+**      by: Qt User Interface Compiler version 4.8.0
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
 ********************************************************************************/

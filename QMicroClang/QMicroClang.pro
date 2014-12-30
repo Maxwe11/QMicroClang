@@ -11,22 +11,27 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp\
-           qmicroclangide.cpp \
-           codeeditor.cpp \
-           qmicroclangtables.cpp \
-           qmicroclangparser.cpp \
-           qmicroclangresulttable.cpp
+        qmicroclangide.cpp \
+        codeeditor.cpp \
+        qmicroclangtables.cpp \
+    scanner.cpp \
+    polish_elemnts.cpp \
+    parser.cpp \
+    compiler.cpp \
+    codegenerator.cpp
 
 HEADERS  += qmicroclangide.h \
             codeeditor.h \
             qmicroclangtables.h \
-            qmicroclangparser.h \
-            qmicroclangresulttable.h
+    utility.h \
+    scanner.h \
+    polish_elemnts.h \
+    parser.h \
+    compiler.h \
+    codegenerator.h
 
 FORMS    += qmicroclangide.ui \
-            qmicroclangtables.ui \
-            qmicroclangresulttable.ui
-
+            qmicroclangtables.ui
 
 
 

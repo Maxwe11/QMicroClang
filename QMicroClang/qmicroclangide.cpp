@@ -1,17 +1,18 @@
-#include <QFile>
-#include <QFileDialog>
-#include <QMessageBox>
-#include <QDebug>
+#include <QtCore/QFile>
+#include <QtGui/QFileDialog>
+#include <QtGui/QMessageBox>
+#include <QtCore/QDebug>
+#include <QtCore/QProcess>
+
 #include "qmicroclangide.h"
 #include "ui_qmicroclangide.h"
 
 #include "qmicroclangtables.h"
-#include "qmicroclangresulttable.h"
 
 QMicroClangIDE::QMicroClangIDE(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::QMicroClangIDE)
-    , parser(new QMicroClangParser(this))
+    , parser(new QMicroClangCompiler(this))
 {
     ui->setupUi(this);
     this->setFixedSize(560, 540);
@@ -44,16 +45,12 @@ void QMicroClangIDE::openFile()
 
 void QMicroClangIDE::showTables()
 {
-    QMicroClangTables* tables = new QMicroClangTables(this->parser);
-    tables->setAttribute(Qt::WA_DeleteOnClose, true);
-    tables->show();
-}
-
-void QMicroClangIDE::showResultTable()
-{
-    QMicroClangResultTable* table = new QMicroClangResultTable(this->parser);
-    table->setAttribute(Qt::WA_DeleteOnClose, true);
-    table->show();
+    if (parser->res_table.empty() == false)
+    {
+        QMicroClangTables* tables = new QMicroClangTables(this->parser);
+        tables->setAttribute(Qt::WA_DeleteOnClose, true);
+        tables->show();
+    }
 }
 
 void QMicroClangIDE::analyze()
@@ -62,11 +59,24 @@ void QMicroClangIDE::analyze()
     if (code.isEmpty() == false)
     {
         QStringList list(code.split('\n'));
-        qDebug() << this->parser->parse(list);
+        qDebug() << this->parser->run(list);
     }
     else
     {
         QMessageBox::warning(this, "Error", "There is no code");
+    }
+}
+
+void QMicroClangIDE::execute()
+{
+    if (!parser->variables.empty())
+    {
+        QProcess proc;
+        proc.startDetached("polish.exe", parser->variables);
+    }
+    else
+    {
+        QMessageBox::warning(this, "Error", "Nothing to execute");
     }
 }
 
@@ -75,12 +85,13 @@ void QMicroClangIDE::catchedError(QStringList lst)
     this->ui->errorsLog->clear();
     foreach(QString str, lst)
     {
-        this->ui->errorsLog->append(QString("<font color=red>%1</font>\n").arg(str));
+        this->ui->errorsLog->appendPlainText(QString("%1").arg(str));
     }
 }
 
 void QMicroClangIDE::noErrors()
 {
     this->ui->errorsLog->clear();
-    this->ui->errorsLog->setText("<font color=green>No errors</font>");
+    this->ui->errorsLog->appendPlainText(QString("No errors"));
+    this->ui->errorsLog->appendPlainText(QString("\n%1").arg(parser->polish_str));
 }

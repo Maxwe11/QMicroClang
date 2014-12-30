@@ -3,14 +3,14 @@
  <class>QMicroClangTables</class>
  <widget class="QWidget" name="QMicroClangTables">
   <property name="windowModality">
-   <enum>Qt::NonModal</enum>
+   <enum>Qt::WindowModal</enum>
   </property>
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>740</width>
-    <height>480</height>
+    <width>451</width>
+    <height>562</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -20,166 +20,247 @@
    </sizepolicy>
   </property>
   <property name="windowTitle">
-   <string>Form</string>
+   <string>Таблиці</string>
   </property>
-  <widget class="QLabel" name="resultTableLabel">
+  <widget class="QGroupBox" name="groupBox">
    <property name="geometry">
     <rect>
      <x>10</x>
      <y>10</y>
-     <width>71</width>
-     <height>16</height>
+     <width>431</width>
+     <height>311</height>
     </rect>
    </property>
-   <property name="text">
-    <string>Result table:</string>
+   <property name="title">
+    <string>Результуюча таблиця</string>
    </property>
+   <widget class="QTableWidget" name="resultTable">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>20</y>
+      <width>331</width>
+      <height>281</height>
+     </rect>
+    </property>
+    <property name="frameShape">
+     <enum>QFrame::WinPanel</enum>
+    </property>
+    <property name="horizontalScrollBarPolicy">
+     <enum>Qt::ScrollBarAlwaysOff</enum>
+    </property>
+    <property name="editTriggers">
+     <set>QAbstractItemView::NoEditTriggers</set>
+    </property>
+    <property name="tabKeyNavigation">
+     <bool>false</bool>
+    </property>
+    <property name="selectionMode">
+     <enum>QAbstractItemView::SingleSelection</enum>
+    </property>
+    <property name="selectionBehavior">
+     <enum>QAbstractItemView::SelectRows</enum>
+    </property>
+    <property name="columnCount">
+     <number>4</number>
+    </property>
+    <attribute name="horizontalHeaderDefaultSectionSize">
+     <number>69</number>
+    </attribute>
+    <column>
+     <property name="text">
+      <string>Рядок</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>Лексема</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>Код</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>Індекс</string>
+     </property>
+    </column>
+   </widget>
+   <widget class="QTableWidget" name="stackTable">
+    <property name="geometry">
+     <rect>
+      <x>350</x>
+      <y>20</y>
+      <width>71</width>
+      <height>251</height>
+     </rect>
+    </property>
+    <property name="frameShadow">
+     <enum>QFrame::Plain</enum>
+    </property>
+    <property name="horizontalScrollBarPolicy">
+     <enum>Qt::ScrollBarAlwaysOff</enum>
+    </property>
+    <property name="editTriggers">
+     <set>QAbstractItemView::NoEditTriggers</set>
+    </property>
+    <property name="selectionMode">
+     <enum>QAbstractItemView::SingleSelection</enum>
+    </property>
+    <property name="selectionBehavior">
+     <enum>QAbstractItemView::SelectRows</enum>
+    </property>
+    <property name="columnCount">
+     <number>1</number>
+    </property>
+    <attribute name="horizontalHeaderDefaultSectionSize">
+     <number>100</number>
+    </attribute>
+    <column>
+     <property name="text">
+      <string>Стек</string>
+     </property>
+    </column>
+   </widget>
+   <widget class="QPushButton" name="stackButton">
+    <property name="geometry">
+     <rect>
+      <x>350</x>
+      <y>280</y>
+      <width>71</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Далі</string>
+    </property>
+    <property name="autoDefault">
+     <bool>true</bool>
+    </property>
+   </widget>
   </widget>
-  <widget class="QTableWidget" name="resultTable">
+  <widget class="QGroupBox" name="groupBox_2">
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>30</y>
-     <width>321</width>
-     <height>441</height>
+     <y>330</y>
+     <width>431</width>
+     <height>221</height>
     </rect>
    </property>
-   <property name="editTriggers">
-    <set>QAbstractItemView::NoEditTriggers</set>
+   <property name="title">
+    <string>Додаткові таблиці</string>
    </property>
-   <property name="selectionMode">
-    <enum>QAbstractItemView::SingleSelection</enum>
-   </property>
-   <property name="selectionBehavior">
-    <enum>QAbstractItemView::SelectRows</enum>
-   </property>
-   <property name="columnCount">
-    <number>4</number>
-   </property>
-   <attribute name="horizontalHeaderDefaultSectionSize">
-    <number>69</number>
-   </attribute>
-   <column/>
-   <column/>
-   <column/>
-   <column/>
-  </widget>
-  <widget class="QTableWidget" name="strTable">
-   <property name="geometry">
-    <rect>
-     <x>600</x>
-     <y>30</y>
-     <width>131</width>
-     <height>441</height>
-    </rect>
-   </property>
-   <property name="editTriggers">
-    <set>QAbstractItemView::NoEditTriggers</set>
-   </property>
-   <property name="selectionMode">
-    <enum>QAbstractItemView::SingleSelection</enum>
-   </property>
-   <property name="selectionBehavior">
-    <enum>QAbstractItemView::SelectRows</enum>
-   </property>
-   <property name="columnCount">
-    <number>1</number>
-   </property>
-   <attribute name="horizontalHeaderDefaultSectionSize">
-    <number>120</number>
-   </attribute>
-   <column/>
-  </widget>
-  <widget class="QTableWidget" name="numTable">
-   <property name="geometry">
-    <rect>
-     <x>470</x>
-     <y>30</y>
-     <width>121</width>
-     <height>441</height>
-    </rect>
-   </property>
-   <property name="editTriggers">
-    <set>QAbstractItemView::NoEditTriggers</set>
-   </property>
-   <property name="selectionMode">
-    <enum>QAbstractItemView::SingleSelection</enum>
-   </property>
-   <property name="selectionBehavior">
-    <enum>QAbstractItemView::SelectRows</enum>
-   </property>
-   <property name="columnCount">
-    <number>1</number>
-   </property>
-   <attribute name="horizontalHeaderDefaultSectionSize">
-    <number>100</number>
-   </attribute>
-   <column/>
-  </widget>
-  <widget class="QTableWidget" name="idTable">
-   <property name="geometry">
-    <rect>
-     <x>340</x>
-     <y>30</y>
-     <width>121</width>
-     <height>441</height>
-    </rect>
-   </property>
-   <property name="editTriggers">
-    <set>QAbstractItemView::NoEditTriggers</set>
-   </property>
-   <property name="selectionMode">
-    <enum>QAbstractItemView::SingleSelection</enum>
-   </property>
-   <property name="selectionBehavior">
-    <enum>QAbstractItemView::SelectRows</enum>
-   </property>
-   <property name="columnCount">
-    <number>1</number>
-   </property>
-   <attribute name="horizontalHeaderDefaultSectionSize">
-    <number>100</number>
-   </attribute>
-   <column/>
-  </widget>
-  <widget class="QLabel" name="idTableLabel">
-   <property name="geometry">
-    <rect>
-     <x>340</x>
-     <y>10</y>
-     <width>81</width>
-     <height>16</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Identifiers table:</string>
-   </property>
-  </widget>
-  <widget class="QLabel" name="numericTableLabel">
-   <property name="geometry">
-    <rect>
-     <x>470</x>
-     <y>10</y>
-     <width>81</width>
-     <height>16</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Numerics table:</string>
-   </property>
-  </widget>
-  <widget class="QLabel" name="strTableLabel">
-   <property name="geometry">
-    <rect>
-     <x>600</x>
-     <y>10</y>
-     <width>81</width>
-     <height>16</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Strings table:</string>
-   </property>
+   <widget class="QTableWidget" name="numTable">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>20</y>
+      <width>101</width>
+      <height>191</height>
+     </rect>
+    </property>
+    <property name="frameShape">
+     <enum>QFrame::Box</enum>
+    </property>
+    <property name="horizontalScrollBarPolicy">
+     <enum>Qt::ScrollBarAlwaysOff</enum>
+    </property>
+    <property name="editTriggers">
+     <set>QAbstractItemView::NoEditTriggers</set>
+    </property>
+    <property name="selectionMode">
+     <enum>QAbstractItemView::SingleSelection</enum>
+    </property>
+    <property name="selectionBehavior">
+     <enum>QAbstractItemView::SelectRows</enum>
+    </property>
+    <property name="columnCount">
+     <number>1</number>
+    </property>
+    <attribute name="horizontalHeaderDefaultSectionSize">
+     <number>100</number>
+    </attribute>
+    <column>
+     <property name="text">
+      <string>Константи</string>
+     </property>
+    </column>
+   </widget>
+   <widget class="QTableWidget" name="idTable">
+    <property name="geometry">
+     <rect>
+      <x>120</x>
+      <y>20</y>
+      <width>171</width>
+      <height>191</height>
+     </rect>
+    </property>
+    <property name="frameShape">
+     <enum>QFrame::Box</enum>
+    </property>
+    <property name="horizontalScrollBarPolicy">
+     <enum>Qt::ScrollBarAlwaysOff</enum>
+    </property>
+    <property name="editTriggers">
+     <set>QAbstractItemView::NoEditTriggers</set>
+    </property>
+    <property name="selectionMode">
+     <enum>QAbstractItemView::SingleSelection</enum>
+    </property>
+    <property name="selectionBehavior">
+     <enum>QAbstractItemView::SelectRows</enum>
+    </property>
+    <property name="columnCount">
+     <number>1</number>
+    </property>
+    <attribute name="horizontalHeaderDefaultSectionSize">
+     <number>100</number>
+    </attribute>
+    <column>
+     <property name="text">
+      <string>Ідентифікатори</string>
+     </property>
+    </column>
+   </widget>
+   <widget class="QTableWidget" name="strTable">
+    <property name="geometry">
+     <rect>
+      <x>300</x>
+      <y>20</y>
+      <width>121</width>
+      <height>191</height>
+     </rect>
+    </property>
+    <property name="frameShape">
+     <enum>QFrame::Box</enum>
+    </property>
+    <property name="horizontalScrollBarPolicy">
+     <enum>Qt::ScrollBarAlwaysOff</enum>
+    </property>
+    <property name="editTriggers">
+     <set>QAbstractItemView::NoEditTriggers</set>
+    </property>
+    <property name="selectionMode">
+     <enum>QAbstractItemView::SingleSelection</enum>
+    </property>
+    <property name="selectionBehavior">
+     <enum>QAbstractItemView::SelectRows</enum>
+    </property>
+    <property name="columnCount">
+     <number>1</number>
+    </property>
+    <attribute name="horizontalHeaderDefaultSectionSize">
+     <number>120</number>
+    </attribute>
+    <column>
+     <property name="text">
+      <string>Рядкові літерали</string>
+     </property>
+    </column>
+   </widget>
   </widget>
  </widget>
  <resources/>

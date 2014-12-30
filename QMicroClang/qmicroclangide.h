@@ -3,7 +3,7 @@
 
 #include <QMainWindow>
 
-#include "qmicroclangparser.h"
+#include "compiler.h"
 
 namespace Ui {
     class QMicroClangIDE;
@@ -19,16 +19,15 @@ public:
 private slots:
     void openFile();
     void showTables();
-    void showResultTable();
     void analyze();
-
+    void execute();
     void catchedError(QStringList);
     void noErrors();
 
 private:
-    Ui::QMicroClangIDE* ui;
-    QMicroClangParser*  parser;
-    QString             filename;
+    Ui::QMicroClangIDE*     ui;
+    QMicroClangCompiler*    parser;
+    QString                 filename;
 };
 
 #endif // QMICROCLANGIDE_H
